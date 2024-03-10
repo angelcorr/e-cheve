@@ -5,7 +5,7 @@ export default {
 </script>
 
 <template>
-  <div class="h-48 m-4 p-4 bg-linen border border-red-800 rounded-lg cursor-pointer">
+  <div class="h-48 my-4 p-4 bg-linen border border-red-800 rounded-lg cursor-pointer">
     <header class="flex w-full justify-between">
       <h3 class="font-bold">
         From: <span class="font-normal">{{ email.from }}</span>
