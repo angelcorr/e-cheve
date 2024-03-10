@@ -69,6 +69,7 @@ func getEmails(w http.ResponseWriter, r *http.Request) {
 	}
 	defer resp.Body.Close()
 
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	_, err = io.Copy(w, resp.Body)
 	if err != nil {
 		log.Println(err)

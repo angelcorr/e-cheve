@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import InputEmail from './InputEmail.vue'
+import InputTerm from './InputTerm.vue'
 import HeaderCheve from './HeaderCheve.vue'
 import EmailItem from './EmailItem.vue'
 import EmailDetails from './EmailDetails.vue'
 
-import { store } from '../store/store'
+import { store } from '../store'
 
 const emailSelected = ref({})
 </script>
@@ -15,7 +15,7 @@ const emailSelected = ref({})
   <div class="bg-white min-h-full h-screen">
     <section class="pb-5">
       <HeaderCheve />
-      <InputEmail />
+      <InputTerm />
     </section>
     <section class="w-full h-3/4 flex justify-center">
       <div class="flex flex-col overflow-y-auto" v-bind:class="[emailSelected ? 'w-1/2' : 'w-5/6']">
@@ -36,3 +36,4 @@ const emailSelected = ref({})
     </section>
   </div>
 </template>
+../store./InputTerm.vue
