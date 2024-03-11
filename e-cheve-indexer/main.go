@@ -22,68 +22,78 @@ type Email struct {
 }
 
 func main() {
-	fmt.Println("Starting...\n-")
+	if len(os.Args) < 2 {
+		log.Fatal("File name argument not provided")
+	}
 
-	file, err := os.Open("enron_mail_20110402.tgz")
+	fmt.Println("Starting...\n-")
+	filename := os.Args[1]
+
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
 	defer file.Close()
 
-	gR, err := gzip.NewReader(file)
+	gzipReader, err := gzip.NewReader(file)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	tR := tar.NewReader(gR)
+	tarReader := tar.NewReader(gzipReader)
 	for {
-		h, err := tR.Next()
+		header, err := tarReader.Next()
 		if err == io.EOF {
 			break
 		}
 
-		if h.Typeflag != tar.TypeReg {
+		if header.Typeflag != tar.TypeReg {
 			continue
 		}
 
-		pM, err := mail.ReadMessage(tR)
+		message, err := mail.ReadMessage(tarReader)
 		if err != nil {
 			fmt.Println("Error", err)
 			continue
 		}
 
-		mH := pM.Header
-		d := mH.Get("Date")
-		f := mH.Get("From")
-		t := mH.Get("To")
-		s := mH.Get("Subject")
-
-		b, err := io.ReadAll(pM.Body)
+		date := message.Header.Get("Date")
+		from := message.Header.Get("From")
+		to := message.Header.Get("To")
+		subject := message.Header.Get("Subject")
+		body, err := io.ReadAll(message.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		zE := os.Getenv("ZINCSEARCH_ENDPOINT")
-		zU := os.Getenv("ZINCSEARCH_USER")
-		zP := os.Getenv("ZINCSEARCH_PASSWORD")
+		ZINCSEARCH_ENDPOINT := os.Getenv("ZINCSEARCH_ENDPOINT")
+		ZINCSEARCH_USER := os.Getenv("ZINCSEARCH_USER")
+		ZINCSEARCH_PASSWORD := os.Getenv("ZINCSEARCH_PASSWORD")
 
-		e, err := json.Marshal(Email{Date: d, From: f, To: t, Subject: s, Body: string(b)})
-		req, err := http.NewRequest("POST", zE, bytes.NewReader(e))
+		email, err := json.Marshal(Email{Date: date, From: from, To: to, Subject: subject, Body: string(body)})
 		if err != nil {
 			log.Fatal(err)
 		}
-		req.SetBasicAuth(zU, zP)
+
+		req, err := http.NewRequest("POST", ZINCSEARCH_ENDPOINT, bytes.NewReader(email))
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		req.SetBasicAuth(ZINCSEARCH_USER, ZINCSEARCH_PASSWORD)
 		req.Header.Set("Content-Type", "application/json")
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.Fatal(err)
 		}
 		defer resp.Body.Close()
-		log.Println(resp.StatusCode)
-		body, err := io.ReadAll(resp.Body)
+
+		_, err = io.ReadAll(resp.Body)
 		if err != nil {
 			log.Fatal(err)
 		}
-		fmt.Println(string(body))
+		fmt.Println("Document indexed")
 	}
+
+	fmt.Println("All documents indexed")
 }
