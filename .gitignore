@@ -1,3 +1,8 @@
 enron_mail_20110402.tgz
 .DS_Store
 data
+*.prof
+profile-new
+profile-old
+e-cheve-indexer
+e-cheve-indexer.test
