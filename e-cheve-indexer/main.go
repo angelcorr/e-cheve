@@ -21,6 +21,37 @@ type Email struct {
 	Body    string
 }
 
+type EmailGroup struct {
+	Index   string  `json:"index"`
+	Records []Email `json:"records"`
+}
+
+func SendGroup(emails []Email) (int, error) {
+	ZINCSEARCH_ENDPOINT := os.Getenv("ZINCSEARCH_ENDPOINT")
+	ZINCSEARCH_USER := os.Getenv("ZINCSEARCH_USER")
+	ZINCSEARCH_PASSWORD := os.Getenv("ZINCSEARCH_PASSWORD")
+
+	email, err := json.Marshal(EmailGroup{Index: "emails", Records: emails})
+	if err != nil {
+		return -1, err
+	}
+
+	req, err := http.NewRequest("POST", ZINCSEARCH_ENDPOINT, bytes.NewReader(email))
+	if err != nil {
+		return -1, err
+	}
+
+	req.SetBasicAuth(ZINCSEARCH_USER, ZINCSEARCH_PASSWORD)
+	req.Header.Set("Content-Type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return -1, err
+	}
+	defer resp.Body.Close()
+
+	return resp.StatusCode, nil
+}
+
 func Index(filename string, limit int) {
 	file, err := os.Open(filename)
 	if err != nil {
@@ -34,6 +65,8 @@ func Index(filename string, limit int) {
 	}
 
 	tarReader := tar.NewReader(gzipReader)
+	emails := []Email{}
+	GROUP_LIMIT := 100
 	i := 0
 	for {
 		if i == limit {
@@ -66,36 +99,34 @@ func Index(filename string, limit int) {
 			continue
 		}
 
-		ZINCSEARCH_ENDPOINT := os.Getenv("ZINCSEARCH_ENDPOINT")
-		ZINCSEARCH_USER := os.Getenv("ZINCSEARCH_USER")
-		ZINCSEARCH_PASSWORD := os.Getenv("ZINCSEARCH_PASSWORD")
-
 		i++
-		email, err := json.Marshal(Email{Date: date, From: from, To: to, Subject: subject, Body: string(body)})
-		if err != nil {
-			log.Fatal(err)
-		}
+		emails = append(emails, Email{Date: date, From: from, To: to, Subject: subject, Body: string(body)})
+		if len(emails) == GROUP_LIMIT {
+			statusCode, err := SendGroup(emails)
+			if err != nil {
+				fmt.Println("Error", err)
+				continue
+			}
 
-		req, err := http.NewRequest("POST", ZINCSEARCH_ENDPOINT, bytes.NewReader(email))
+			if statusCode != 200 {
+				fmt.Println("Error", statusCode)
+				continue
+			}
+			fmt.Println("Document group indexed")
+
+			emails = nil
+		}
+	}
+	if len(emails) > 0 {
+		statusCode, err := SendGroup(emails)
 		if err != nil {
 			fmt.Println("Error", err)
-			continue
 		}
 
-		req.SetBasicAuth(ZINCSEARCH_USER, ZINCSEARCH_PASSWORD)
-		req.Header.Set("Content-Type", "application/json")
-		resp, err := http.DefaultClient.Do(req)
-		if err != nil {
-			fmt.Println("Error", err)
-			continue
+		if statusCode != 200 {
+			fmt.Println("Error", statusCode)
 		}
-		defer resp.Body.Close()
-
-		if resp.StatusCode != 200 {
-			fmt.Println("Error", resp.StatusCode)
-			continue
-		}
-		fmt.Println("Document indexed")
+		fmt.Println("Document group indexed")
 	}
 
 	fmt.Println("All documents indexed")
