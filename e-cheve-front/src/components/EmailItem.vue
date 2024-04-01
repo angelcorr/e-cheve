@@ -5,16 +5,18 @@ export default {
 </script>
 
 <template>
-  <div class="h-48 my-4 p-4 bg-linen border border-red-800 rounded-lg cursor-pointer">
+  <div class="h-48 m-4 p-4 bg-linen border border-red-800 rounded-lg cursor-pointer">
     <header class="flex w-full justify-between">
+      <div>
+        <h3 class="font-bold">
+          From: <span class="font-normal">{{ email.from }}</span>
+        </h3>
+        <h3 class="font-bold">
+          To: <span class="font-normal">{{ email.to }}</span>
+        </h3>
+      </div>
       <h3 class="font-bold">
-        From: <span class="font-normal">{{ email.from }}</span>
-      </h3>
-      <h3 class="font-bold">
-        To: <span class="font-normal">{{ email.to }}</span>
-      </h3>
-      <h3 class="font-bold">
-        Date: <span class="font-normal">{{ email.date }}</span>
+        Date: <span class="font-normal">{{ new Date(email.date).toLocaleDateString() }}</span>
       </h3>
     </header>
     <section>
