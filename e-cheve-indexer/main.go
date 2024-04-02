@@ -36,7 +36,7 @@ func SendGroup(emails []Email) (int, error) {
 		return -1, err
 	}
 
-	req, err := http.NewRequest("POST", ZINCSEARCH_ENDPOINT, bytes.NewReader(email))
+	req, err := http.NewRequest("POST", fmt.Sprintf("%v/api/_bulkv2", ZINCSEARCH_ENDPOINT), bytes.NewReader(email))
 	if err != nil {
 		return -1, err
 	}

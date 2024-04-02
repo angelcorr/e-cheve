@@ -19,9 +19,11 @@ interface ApiResponse {
 }
 
 const submit = async () => {
-  const endpoint = `${import.meta.env.VITE_API_BASE_URL}/emails?term=${store.value.term}`
-  const response = await fetch(endpoint)
-  const apiResponse: ApiResponse = await response.json()
+  const endpoint = `${import.meta.env.VITE_API_BASE_URL}/emails?term=${store.value.term}`;
+  const response = await fetch(endpoint);
+  if (response.status !== 200) return 'There was a problem'; //To improve
+
+  const apiResponse: ApiResponse = await response.json();
 
   const emails: Email[] = apiResponse.hits.hits.map((hit) => ({
     id: hit._id,
@@ -30,8 +32,9 @@ const submit = async () => {
     date: hit._source.Date,
     subject: hit._source.Subject,
     body: hit._source.Body
-  }))
-  store.value.emails = emails
+  }));
+
+  store.value.emails = emails;
 }
 </script>
 
@@ -46,4 +49,3 @@ const submit = async () => {
     />
   </form>
 </template>
-../store

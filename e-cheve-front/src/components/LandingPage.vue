@@ -13,7 +13,7 @@ const emailSelected = ref({})
 
 <template>
   <div class="bg-white min-h-full h-screen">
-    <section class="pb-5">
+    <section class="pb-5 mx-8">
       <HeaderCheve />
       <InputTerm />
     </section>
@@ -36,4 +36,3 @@ const emailSelected = ref({})
     </section>
   </div>
 </template>
-../store./InputTerm.vue
