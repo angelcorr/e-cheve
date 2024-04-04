@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { reactive } from 'vue'
 
 export interface Email {
   id: string
@@ -9,7 +9,12 @@ export interface Email {
   body: string
 }
 
-export const store = ref({
+export const store = reactive({
   emails: [] as Email[],
-  term: ''
+  term: '',
+  emailSelected: {},
+  changeEmailSelected(email: Email) {
+    this.emailSelected = email;
+    return this.emailSelected;
+  }
 })
