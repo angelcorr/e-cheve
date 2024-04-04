@@ -19,7 +19,9 @@ interface ApiResponse {
 }
 
 const submit = async () => {
-  const endpoint = `${import.meta.env.VITE_API_BASE_URL}/emails?term=${store.value.term}`;
+  if (store.term.length < 1) return;
+
+  const endpoint = `${import.meta.env.VITE_API_BASE_URL}/emails?term=${store.term}`;
   const response = await fetch(endpoint);
   if (response.status !== 200) return 'There was a problem'; //To improve
 
@@ -34,18 +36,19 @@ const submit = async () => {
     body: hit._source.Body
   }));
 
-  store.value.emails = emails;
+  store.emails = emails;
 }
 </script>
 
 <template>
-  <form @submit.prevent @submit="submit" class="input-wrapper w-full flex justify-center">
+  <section class="input-wrapper w-full flex justify-center">
     <input
       v-model="store.term"
+      v-on:input="submit"
       type="text"
       name="email-search"
-      placeholder="Keyword"
+      placeholder="Search for emails"
       class="w-1/2 p-4 text-lg border border-solid border-red-800 rounded-md placeholder:text-red-950 placeholder:opacity-25 outline-black"
     />
-  </form>
+  </section>
 </template>
