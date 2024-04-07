@@ -3,7 +3,7 @@ const props = defineProps(['email'])
 </script>
 
 <template>
-  <div class="h-48 max-h-48 m-4 p-4 bg-linen border rounded-lg cursor-pointer">
+  <div class="h-48 max-h-48 m-4 p-4 bg-linen border border-red-800 rounded-lg cursor-pointer">
     <header class="flex w-full justify-between">
       <div>
         <h3 class="font-bold">

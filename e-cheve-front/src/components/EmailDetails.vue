@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { store } from '../store'
+
 const props = defineProps(['emailSelected'])
 </script>
 
@@ -6,9 +8,12 @@ const props = defineProps(['emailSelected'])
   <section class="h-full max-h-full m-4 p-4 overflow-y-auto border border-red-800 rounded-lg">
     <div>
       <header>
-        <p class="font-bold py-1">
-          From: <span class="font-normal">{{ props.emailSelected.from }}</span>
-        </p>
+        <div class="flex justify-between">
+          <p class="font-bold py-1">
+            From: <span class="font-normal">{{ props.emailSelected.from }}</span>
+          </p>
+          <a class="text-lg cursor-pointer" @click="store.removeEmailSelected()">×</a>
+        </div>
         <p class="font-bold py-1">
           To: <span class="font-normal">{{ props.emailSelected.to }}</span>
         </p>

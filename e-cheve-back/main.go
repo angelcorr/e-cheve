@@ -24,7 +24,13 @@ func main() {
 
 func getEmails(w http.ResponseWriter, r *http.Request) {
 	term := r.URL.Query().Get("term")
+	page := r.URL.Query().Get("page")
 	if term == "" {
+		http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
+		return
+	}
+
+	if page == "" {
 		http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
 		return
 	}
@@ -36,6 +42,8 @@ func getEmails(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonPage := json.Number(page)
+
 	query := fmt.Sprintf(`{
 		"search_type": "match",
 		"query": {
@@ -43,10 +51,10 @@ func getEmails(w http.ResponseWriter, r *http.Request) {
 				"start_time": "2024-01-01T00:00:00Z",
 				"end_time": "2024-12-31T00:00:00Z"
 		},
-		"from": 0,
+		"from": %v,
 		"max_results": 10,
 		"_source": []
-	}`, string(jsonTerm))
+	}`, string(jsonTerm), jsonPage)
 
 	ZINCSEARCH_ENDPOINT := os.Getenv("ZINCSEARCH_ENDPOINT")
 	ZINCSEARCH_USER := os.Getenv("ZINCSEARCH_USER")
